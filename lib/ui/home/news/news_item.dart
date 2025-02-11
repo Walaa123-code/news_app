@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/model/NewsResponse.dart';
+import 'package:news_app/utils/app_colors.dart';
 import 'package:news_app/utils/app_style.dart';
 class NewsItem extends StatelessWidget {
   News news;
@@ -30,7 +31,8 @@ class NewsItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.network(news.urlToImage??''),
-          ),
+         )
+          ,
           SizedBox(height: height*0.02),
           Text(news.title??"",
           style: Theme.of(context).textTheme.headlineLarge,),
