@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:news_app/utils/app_colors.dart';
+import 'package:news_app/utils/app_style.dart';
 
-import '../../../utils/app_style.dart';
-
-
-// ignore: must_be_immutable
 class DrawerItem extends StatelessWidget {
-  DrawerItem({super.key,required this.imagePath,required this.text});
-  String imagePath;
-  String text;
+String imagePath;
+String text;
+DrawerItem({required this.imagePath,
+required this.text});
+
+
   @override
   Widget build(BuildContext context) {
-    var height=MediaQuery.of(context).size.height;
-    var width=MediaQuery.of(context).size.width;
-
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
     return Padding(
-      padding:  EdgeInsets.symmetric(
-        vertical: height*0.02,
-        horizontal: width*0.04,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: width*0.04,
+      vertical: height*0.01),
       child: Row(
         children: [
-          ImageIcon(AssetImage(imagePath)),
+          ImageIcon(AssetImage(imagePath),
+          color: AppColors.whiteColor,),
           SizedBox(width: width*0.02,),
-          Text(text,style: AppStyles.white20bold,),
+          Text(text,
+          style: AppStyles.bold20white,)
         ],
       ),
     );

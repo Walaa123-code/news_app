@@ -1,122 +1,71 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
+import 'package:news_app/api/api_manager.dart';
+import 'package:news_app/model/NewsResponse.dart';
+import 'package:news_app/model/SourceResponse.dart';
+import 'package:news_app/ui/home/news/news_item.dart';
 
-import '../../../di/di.dart';
-import '../../../model/SourceResponse.dart';
-import '../../../provider/language_provider.dart';
 import '../../../utils/app_colors.dart';
-import 'Cubit/news_state.dart';
-import 'Cubit/news_view_model.dart';
-import 'news_item.dart';
 
 class NewsWidget extends StatefulWidget {
-  const NewsWidget({super.key, required this.source});
-  final Source source;
+  Source source;
+  NewsWidget({required this.source});
 
   @override
   State<NewsWidget> createState() => _NewsWidgetState();
 }
 
 class _NewsWidgetState extends State<NewsWidget> {
-  late ScrollController _scrollController;
-  late NewsViewModel _newsViewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
-    _newsViewModel = NewsViewModel(newsRepositoryContract: injectRepositoryNewsResponse());
-    _loadNews();
-  }
-
-  @override
-  void didUpdateWidget(covariant NewsWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.source.id != widget.source.id) {
-      setState(() {
-        _newsViewModel.newsList.clear();
-        _newsViewModel.currentPage = 1;
-        _newsViewModel.hasMore = true;
-        _loadNews();
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent * 0.9 &&
-        _newsViewModel.hasMore) {
-      _loadNews();
-    }
-  }
-
-  void _loadNews() {
-    final languageProvider =
-    Provider.of<LanguageProvider>(context, listen: false);
-    String currentLanguage = languageProvider.appLanguage;
-    _newsViewModel.getNews(widget.source.id!, currentLanguage, _newsViewModel.currentPage);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDarkTheme = theme.brightness == Brightness.dark;
-    //final appLocalizations = AppLocalizations.of(context);
+    return FutureBuilder<NewsResponse?>(
+        future: ApiManager.getNewsBySourceId(widget.source.id??""),
+        builder: (context,snapshot){
+          if(snapshot.connectionState == ConnectionState.waiting){
+            return const Center(
+            child: CircularProgressIndicator(
+            color: AppColors.grayColor,
+            ),
+            );
+    }else if(snapshot.hasError){
+            return Center(
+              child: Column(
+              children: [
+                const Text('Something went wrong'),
+                  ElevatedButton(onPressed: (){
+                    ApiManager.getNewsBySourceId(widget.source.id??'');
+                    setState(() {
 
-    return BlocProvider.value(
-      value: _newsViewModel,
-      child: BlocBuilder<NewsViewModel, NewsState>(
-        builder: (context, state) {
-          if (state is NewsLoadingState && _newsViewModel.newsList.isEmpty) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: isDarkTheme ? AppColors.whiteColor : AppColors.greyColor,
+                    });
+                  },
+                  child: const Text('Try again'))
+              ],
               ),
             );
-          } else if (state is NewsErrorState) {
+    }
+          // server => response (success, error)
+          if(snapshot.data!.status != 'ok'){
             return Center(
-              child: Text(state.errorMessage!),
-            );
-          } else if (state is NewsSuccessState || _newsViewModel.newsList.isNotEmpty) {
-            return Container(
-              color: theme.scaffoldBackgroundColor,
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _newsViewModel.newsList.length + 1,
-                itemBuilder: (context, index) {
-                  if (index < _newsViewModel.newsList.length) {
-                    return NewsItem(news: _newsViewModel.newsList[index]);
-                  } else {
-                    return _newsViewModel.hasMore
-                        ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(
-                          color: isDarkTheme
-                              ? AppColors.whiteColor
-                              : AppColors.greyColor,
-                        ),
-                      ),
-                    )
-                        : const SizedBox.shrink();
-                  }
-                },
+              child: Column(
+                children: [
+                   Text(snapshot.data!.message!),
+                  ElevatedButton(onPressed: (){
+                    ApiManager.getNewsBySourceId(widget.source.id??'');
+                    setState(() {
+
+                    });
+                  },
+                      child: const Text('Try again'))
+                ],
               ),
             );
-          } else {
-            return const SizedBox.shrink();
           }
-        },
-      ),
-    );
+          var newList = snapshot.data!.articles!;
+          return ListView.builder(itemBuilder: (context,index){
+            return NewsItem(news: newList[index]);
+          },
+            itemCount: newList.length,
+          );
+    });
   }
+
 }
