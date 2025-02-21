@@ -1,66 +1,50 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
-
-import '../model/NewsResponse.dart';
-import '../model/SourceResponse.dart';
-import 'api_constant.dart';
-import 'end_point.dart';
 import 'package:http/http.dart' as http;
+import 'package:news_app/api/end_point.dart';
+import 'package:news_app/model/NewsResponse.dart';
+import 'package:news_app/model/SourceResponse.dart';
 
-@Singleton()
-class ApiManager{
-  ApiManager._();
-  static ApiManager? _instance;
-  static ApiManager getInstance() {
-    _instance ??= ApiManager._();
-    return _instance!;
-  }
-  Future<SourceResponse?> getSources(String categoryId, String language) async {
-    Uri url = Uri.https(
-        ApiConstants.baseUrl,
-        Endpoints.sourceApi,
-        {
-          'apiKey': ApiConstants.apiKey,
-          'category': categoryId,
-          'language': language,
-        }
-    );
+import 'api_constant.dart';
+
+class ApiManager {
+  /*
+    https://newsapi.org/v2/top-headlines/sources?apiKey=0456827cba87470e8977438c2895c406
+     */
+  static Future<SourceResponse?> getSources() async {
+    Uri url = Uri.https(ApiConstant.baseUrl, EndPoints.sourceApi,
+        {'apiKey': ApiConstant.apiKey});
     try {
       var response = await http.get(url);
-      var bodyResponse = response.body;
-      var json = jsonDecode(bodyResponse);
-      return SourceResponse.fromJson(json);
+      var bodyString = response.body; // String
+      var json = jsonDecode(bodyString); // json
+      return SourceResponse.fromJson(json); // object
+       // SourceResponse.fromJson(jsonDecode(response.body));
+
+      // String => json => object
     } catch (e) {
       throw e;
     }
   }
 
-  Future<NewsResponse?> getNewsBySourceId(
-      String sourceId,
-      String language,
-      int page,
-      ) async {
-    Uri url = Uri.https(
-      ApiConstants.baseUrl,
-      Endpoints.newsApi,
+  /*
+  https://newsapi.org/v2/everything?q=bitcoin&apiKey=0456827cba87470e8977438c2895c406
+   */
+static Future<NewsResponse?> getNewsBySourceId(String sourceId)async {
+  Uri url = Uri.https(ApiConstant.baseUrl, EndPoints.newsApi,
       {
-        'apiKey': ApiConstants.apiKey,
-        'sources': sourceId,
-        'language': language,
-        'page': page.toString(),
-
-      },
-    );
-    try {
-      var response = await http.get(url);
-      var responseBody = response.body;
-      var json = jsonDecode(responseBody);
-      return NewsResponse.fromJson(json);
-    } catch (e) {
-      throw e;
-    }
+        'apiKey': ApiConstant.apiKey,
+        'sources': sourceId
+      }
+  );
+  try {
+    var response = await http.get(url);
+    var responseBody = response.body;
+    var json = jsonDecode(responseBody);
+    return NewsResponse.fromJson(json);
+    //NewsResponse.fromJson(jsonDecode(response.body));
+  } catch (e) {
+    throw e;
   }
-
-
+}
 }
