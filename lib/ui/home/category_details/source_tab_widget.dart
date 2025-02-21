@@ -1,46 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/model/SourceResponse.dart';
 import 'package:news_app/ui/home/category_details/source_name_widget.dart';
-import 'package:news_app/ui/home/news/news_widget.dart';
-import 'package:news_app/utils/app_colors.dart';
 
-class SourceTabWidget extends StatefulWidget {
+import '../../../model/SourceResponse.dart';
+import '../../../utils/app_colors.dart';
+import '../news/news_widget.dart';
+// ignore: must_be_immutable
+class TabBarCategory extends StatefulWidget {
+  TabBarCategory({super.key, required this.sourceList});
   List<Source> sourceList;
 
-  SourceTabWidget({required this.sourceList});
-
   @override
-  State<SourceTabWidget> createState() => _SourceTabWidgetState();
+  State<TabBarCategory> createState() => _TabBarCategoryState();
 }
 
-class _SourceTabWidgetState extends State<SourceTabWidget> {
+class _TabBarCategoryState extends State<TabBarCategory> {
   int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: widget.sourceList.length,
-        child: Column(
-          children: [
-            TabBar(
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              indicatorColor: Theme.of(context).indicatorColor,
-              dividerColor: AppColors.transParentColor,
-              onTap: (index){
-                selectedIndex = index;
-                setState(() {
 
-                });
-              },
-                tabs: widget.sourceList.map((source){
-                  return SourceNameWidget(source: source,
-                      isSelected: selectedIndex == widget.sourceList.indexOf(source));
-                }).toList()
-            ),
-            Expanded(child: NewsWidget(source: widget.sourceList[selectedIndex]))
-          ],
-        )
+    if (widget.sourceList.isEmpty) {
+      return Center(
+        child: Text('No sources available'),
+      );
+    }
+
+    return Column(
+      children: [
+        DefaultTabController(
+          length: widget.sourceList.length,
+          child: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            indicatorColor: Theme.of(context).indicatorColor,
+            dividerColor: AppColors.transparent,
+            onTap: (index) {
+              setState(() {
+                selectedIndex = index;
+              });
+            },
+            tabs: widget.sourceList.map((source) {
+              return SourcenameWidget(
+                source: source,
+                isSelected: selectedIndex == widget.sourceList.indexOf(source),
+              );
+            }).toList(),
+          ),
+        ),
+        Expanded(
+          child: widget.sourceList.isNotEmpty
+              ? NewsWidget(source: widget.sourceList[selectedIndex])
+              :const  Center(child: CircularProgressIndicator()),
+        ),
+      ],
     );
   }
 }

@@ -1,52 +1,62 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:news_app/model/category_model.dart';
-import 'package:news_app/ui/home/category_details/category_details.dart';
-import 'package:news_app/utils/app_colors.dart';
-
+import 'package:provider/provider.dart';
+import '../../model/SourceResponse.dart';
+import '../../model/category__model.dart';
+import '../../provider/language_provider.dart';
+import '../../utils/app_colors.dart';
+import 'Drawer/home_drawer.dart';
+import 'category_details/category_details.dart';
 import 'category_details/category_fragment.dart';
-import 'drawer/home_drawer.dart';
+import 'news/search.dart';
 
-class HomeScreen extends StatefulWidget {
-  static const String routeName = 'home_screen';
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomePageState extends State<HomePage> {
+  int selectedIndex = 0;
+
+  List<Source> sourceList = [];
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    String currentLanguage = languageProvider.appLanguage;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          selectedCategory == null ?
-          'Home':
-              selectedCategory!.title,
-        style: Theme.of(context).textTheme.labelLarge,),
+            selectedCategory==null ?
+            "home": selectedCategory!.title,
+            style:Theme.of(context).textTheme.labelLarge),
+        actions: [
+          SearchBarr(sourceList: sourceList, sourceNumber: selectedIndex,),
+        ],
+
       ),
       drawer: Drawer(
         backgroundColor: AppColors.blackColor,
-        child: HomeDrawer(onDrawerItemClicked: onDrawerItemClicked,),
+        child:  HomeDrawer(onDrawerClicked: onDrawerClicked,),
       ),
       body: selectedCategory==null?
-      CategoryFragment(onViewAllClick:onViewAllClicked ,):
+      CategoryFragment(onViewAllClick:onViewAllClick ,):
       CategoryDetails(category: selectedCategory!,)
       ,
     );
   }
-
   CategoryModel? selectedCategory;
-
-  void onViewAllClicked(CategoryModel newSelectedCategory){
-    //todo: newSelectedCategory => user select
-    selectedCategory = newSelectedCategory;
+  void onViewAllClick(CategoryModel newSelectedCategory){
+    selectedCategory=newSelectedCategory;
     setState(() {
 
     });
   }
-  void onDrawerItemClicked(){
-    selectedCategory = null;
-    Navigator.pop(context);
+
+  void  onDrawerClicked() {
+    selectedCategory=null;
+    Navigator.of(context).pop();
     setState(() {
 
     });

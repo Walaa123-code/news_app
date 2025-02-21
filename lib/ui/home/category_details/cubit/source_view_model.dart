@@ -1,15 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:news_app/api/api_manager.dart';
+import 'package:injectable/injectable.dart';
 import 'package:news_app/ui/home/category_details/cubit/source_state.dart';
 
-class SourceViewModel extends Cubit<SourceState>{
-  SourceViewModel() : super(SourceLoadingState());
+import '../../../../repository/sources/repository/source_repository.dart';
 
-   // todo hold data , handle logic
-  void getSources(String categoryId)async{
+@injectable
+class SourceViewModel extends Cubit<SourceState>{
+  late SourceRepository sourceRepository;
+
+  SourceViewModel({required this.sourceRepository}):super(SourceLoadingState());
+
+  void getSources(String categoryId, currentLanguage)async{
     try{
       emit(SourceLoadingState());
-      var response= await ApiManager.getSources(categoryId);
+      var response= await sourceRepository.getSources(categoryId, currentLanguage);
       if(response?.status=="error"){
         emit(SourceErrorState(errorMessage: response!.message!));
         return ;

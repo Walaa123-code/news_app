@@ -2,18 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../../model/SourceResponse.dart';
 
-
-class SourceNameWidget extends StatelessWidget {
+// ignore: must_be_immutable
+class SourcenameWidget extends StatelessWidget {
+  SourcenameWidget({super.key,required this.source,required this.isSelected});
+  Source source;
   bool isSelected;
-  Source source ;
-  SourceNameWidget({required this.source, required this.isSelected});
-
   @override
   Widget build(BuildContext context) {
-    return Text(source.name??'',
-      style: isSelected ?
-      Theme.of(context).textTheme.headlineLarge:
-      Theme.of(context).textTheme.headlineMedium);
-
+    return Text(
+      source.name??'',
+      style: isSelected?
+      Theme.of(context).textTheme.headlineLarge:Theme.of(context).textTheme.headlineMedium,);
   }
 }

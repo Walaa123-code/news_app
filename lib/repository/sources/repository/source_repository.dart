@@ -1,8 +1,8 @@
-/*
-import 'package:news_app/model/SourceResponse.dart';
 
-abstract class SourceRepository{
- Future<SourceResponse?> getSources(String categoryId);
+//todo:interface
+
+import '../../../model/SourceResponse.dart';
+
+abstract class  SourceRepository{
+ Future<SourceResponse?>getSources(String categoryId,String currentLanguage);
 }
-
- */
